@@ -1,0 +1,7 @@
+# Name,   Type, SubType, Offset,  Size,   Flags
+# nvs holds the saved input mode and calibration offsets (SW-9).
+nvs,      data, nvs,     0x9000,  0x6000,
+phy_init, data, phy,     0xf000,  0x1000,
+# One 3 MB app slot: Wi-Fi + HTTP server + ESP-DSP + the embedded web page
+# would not fit the default 1 MB slot.
+factory,  app,  factory, 0x10000, 3M,

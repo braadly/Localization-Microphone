@@ -1,0 +1,7 @@
+## Components downloaded by the ESP-IDF Component Manager on the first build.
+dependencies:
+  idf: ">=5.4"
+  # Espressif's DSP library: optimized FFT and biquad filters for the ESP32-S3.
+  # A general-purpose math library, not a device driver, so it does not touch
+  # the course's "student-developed peripheral driver" rule.
+  espressif/esp-dsp: "^1.5.0"

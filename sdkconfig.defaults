@@ -1,0 +1,20 @@
+# Project-wide build settings. `sdkconfig` is generated from this file the first
+# time the project is configured (and is git-ignored), so every setting the
+# firmware depends on lives here where the whole team can see it.
+
+CONFIG_IDF_TARGET="esp32s3"
+
+# Run both cores at full speed: the localization pipeline is FFT-heavy.
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+
+# 1 ms FreeRTOS tick so vTaskDelay / timeouts resolve to 1 ms instead of 10 ms.
+CONFIG_FREERTOS_HZ=1000
+
+# Flash: 4 MB is the smallest flash fitted to any ESP32-S3 module, so this works
+# on every dev board (and on the N16R8 module, which simply has room to spare).
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# WebSocket support in the built-in HTTP server (phone web app, Step 6).
+CONFIG_HTTPD_WS_SUPPORT=y
