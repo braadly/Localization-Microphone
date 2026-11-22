@@ -21,12 +21,47 @@
 #define SAMPLE_RATE_PER_CHANNEL_HZ          24000
 #define ADC_CONVERSION_RATE_HZ              (SAMPLE_RATE_PER_CHANNEL_HZ * MICROPHONE_COUNT)
 
+/* The ADC's sample clock is divided down from the bus clock, so only certain
+ * rates exist and the driver rounds our request to the nearest one. Measured
+ * with esp_timer on the real board (Step 1): about 24,500 samples/s per channel.
+ * All sample-count to time conversions must use this value, not the request
+ * above. Re-measure if the ADC clock settings ever change. */
+#define ACTUAL_SAMPLE_RATE_PER_CHANNEL_HZ   24500
+
 /* ADC1 channel number for each microphone (ESP32-S3: ADC1_CHn is GPIO n+1).
  * GPIO0/GPIO3 are strapping pins and GPIO4-GPIO9 are reserved for the
  * PCM1864 and its I2C bus on the final board, so they are avoided here. */
 #define MIC_A_ADC_CHANNEL                   0   /* GPIO1  */
 #define MIC_B_ADC_CHANNEL                   1   /* GPIO2  */
 #define MIC_C_ADC_CHANNEL                   9   /* GPIO10 */
+
+/* The ADC is told to attenuate its input by 12 dB so it can read up to about
+ * 3.1 V. A 12-bit conversion gives raw values 0..4095; silence sits near the
+ * middle (about 2048, roughly 1.65 V) because the preamp biases the mic there. */
+#define ADC_RAW_MAXIMUM                     4095
+
+/* The ADC hardware fills a DMA buffer with conversions and raises one
+ * interrupt per full "frame". 288 conversions = 96 samples of each microphone
+ * = 4 ms of audio, short enough for low latency, long enough to keep the
+ * interrupt rate low (250 per second). Each conversion result is 4 bytes. */
+#define ADC_CONVERSIONS_PER_FRAME           288
+#define ADC_RESULT_BYTES                    4
+#define ADC_FRAME_BYTES                     (ADC_CONVERSIONS_PER_FRAME * ADC_RESULT_BYTES)
+
+/* Driver-internal pool that holds frames the task has not read yet (4 frames,
+ * 16 ms). If the task falls further behind than this, samples are lost. */
+#define ADC_POOL_BYTES                      (4 * ADC_FRAME_BYTES)
+
+/* ===================================================================
+ * Audio ring buffer. Holds the most recent audio of every microphone so the
+ * pipeline can look back from the moment an onset is detected.
+ * 4096 samples = 170 ms at 24 kHz. A power of two lets the buffer wrap with a
+ * bit mask instead of a division. (3 channels x 2 bytes x 4096 = 24 KB.)
+ * =================================================================== */
+#define RING_BUFFER_CAPACITY_SAMPLES        4096
+
+/* How often the serial monitor prints capture statistics. */
+#define CAPTURE_REPORT_INTERVAL_MS          1000
 
 /* ===================================================================
  * Array geometry (Figure 2.6.1). Origin = lower-left corner of the
