@@ -18,3 +18,7 @@ CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 
 # WebSocket support in the built-in HTTP server (phone web app, Step 6).
 CONFIG_HTTPD_WS_SUPPORT=y
+
+# -O2: the generator and the FFT pipeline are float-heavy; the default debug
+# level (-Og) made each clap take 80-150% of Core 1 (Step 1b timing log).
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
