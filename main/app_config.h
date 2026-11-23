@@ -63,6 +63,40 @@
 /* How often the serial monitor prints capture statistics. */
 #define CAPTURE_REPORT_INTERVAL_MS          1000
 
+/* How often app_main wakes to check for work (reports, synthetic clap checks). */
+#define MAIN_LOOP_INTERVAL_MS               50
+
+/* ===================================================================
+ * Synthetic clap source (Step 1b). Fake microphones for testing without
+ * hardware: noise plus claps from known positions, written into the ring
+ * buffer at the real capture rate.
+ * =================================================================== */
+
+/* 1 = feed the pipeline synthetic claps (no microphones needed),
+ * 0 = real capture from ADC1. */
+#define AUDIO_SOURCE_SYNTHETIC              1
+
+/* Silence level (mid-scale, where the preamp biases the mic) and the size of
+ * the background noise (standard deviation, in ADC counts). */
+#define SYNTHETIC_BASELINE_RAW              2048.0f
+#define SYNTHETIC_NOISE_SIGMA_RAW           6.0f
+
+/* Frames are written in blocks every 4 ms: 24,500 x 0.004 = 98 frames,
+ * the same block length as the real ADC's DMA frames. */
+#define SYNTHETIC_BLOCK_INTERVAL_MS         4
+#define SYNTHETIC_BLOCK_SAMPLES             (ACTUAL_SAMPLE_RATE_PER_CHANNEL_HZ * SYNTHETIC_BLOCK_INTERVAL_MS / 1000)
+
+/* First sound 1 s after boot, then one every 1.5 s (time to read each result). */
+#define SYNTHETIC_FIRST_SCENARIO_DELAY_MS   1000
+#define SYNTHETIC_SCENARIO_INTERVAL_MS      1500
+
+/* Fixed seed: every run plays exactly the same audio, so results repeat. */
+#define SYNTHETIC_RANDOM_SEED               12345u
+
+/* Wall for the echo scenario: 1 ft left of the sensing area, reflecting half the sound. */
+#define SYNTHETIC_WALL_X_FT                 (-1.0f)
+#define SYNTHETIC_WALL_REFLECTION           0.5f
+
 /* ===================================================================
  * Array geometry (Figure 2.6.1). Origin = lower-left corner of the
  * sensing area, X to the right, Y up, all distances in feet.
